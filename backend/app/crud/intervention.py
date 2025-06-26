@@ -11,24 +11,9 @@ class InterventionCRUD:
     """CRUD operations for Intervention model"""
 
     def create(self, db: Session, obj_in: InterventionCreate) -> Intervention:
-        """Create a new intervention"""
-        db_obj = Intervention(
-            name=obj_in.name,
-            description=obj_in.description,
-            intervention_type=obj_in.intervention_type,
-            location_lat=obj_in.location_lat,
-            location_lon=obj_in.location_lon,
-            deployment_date=obj_in.deployment_date,
-            capacity_tonnes_co2=obj_in.capacity_tonnes_co2,
-            status=obj_in.status,
-            operator=obj_in.operator,
-            cost_per_tonne=obj_in.cost_per_tonne,
-            technology_readiness_level=obj_in.technology_readiness_level,
-            verification_method=obj_in.verification_method,
-            expected_lifetime_years=obj_in.expected_lifetime_years,
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow()
-        )
+        """Create a new intervention using dynamic field assignment"""
+        obj_data = obj_in.model_dump(exclude_none=True)
+        db_obj = Intervention(**obj_data)
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
@@ -82,11 +67,8 @@ class InterventionCRUD:
         db_obj: Intervention, 
         obj_in: InterventionUpdate
     ) -> Intervention:
-        """Update an intervention"""
-        update_data = obj_in.dict(exclude_unset=True)
-        
-        # Update the updated_at timestamp
-        update_data["updated_at"] = datetime.utcnow()
+        """Update an intervention using dynamic field assignment"""
+        update_data = obj_in.model_dump(exclude_unset=True, exclude_none=True)
         
         for field, value in update_data.items():
             setattr(db_obj, field, value)
@@ -140,4 +122,4 @@ class InterventionCRUD:
 
 
 # Create a singleton instance
-intervention = InterventionCRUD() 
+intervention = InterventionCRUD()
