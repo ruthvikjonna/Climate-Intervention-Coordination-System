@@ -1,7 +1,7 @@
 """register intervention table
 
 Revision ID: 919599410cbe
-Revises: 0ac017684235
+Revises: None
 Create Date: 2025-06-25 22:49:07.835955
 
 """
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = '919599410cbe'
-down_revision: Union[str, Sequence[str], None] = '0ac017684235'
+down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
