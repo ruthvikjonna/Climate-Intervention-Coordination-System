@@ -6,6 +6,7 @@ from sqlalchemy import create_engine, pool
 from alembic import context
 
 from app.core.database import Base
+from app.models import intervention  # 👈 import your models here
 
 # Load environment variables from .env
 load_dotenv()
