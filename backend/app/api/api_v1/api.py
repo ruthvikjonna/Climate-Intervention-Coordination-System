@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.api_v1.endpoints import interventions, satellite_data, intervention_impacts, optimization_results, data_sources
+from app.api.api_v1.endpoints import interventions, satellite_data, intervention_impacts, optimization_results, data_sources, climate_data
 
 api_router = APIRouter()
 
@@ -33,4 +33,10 @@ api_router.include_router(
     data_sources.router,
     prefix="/data-sources",
     tags=["data-sources"]
+)
+
+api_router.include_router(
+    climate_data.router,
+    prefix="/climate-data",
+    tags=["climate-data"]
 ) 
