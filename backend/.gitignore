@@ -24,3 +24,6 @@ pytest_cache/
 
 # Alembic migrations (if not manually managed)
 migrations/
+
+# Ignore local SQLite test database
+test.db
