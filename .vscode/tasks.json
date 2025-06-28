@@ -1,0 +1,28 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Backend",
+      "type": "shell",
+      "command": "cd backend; .\\venv\\Scripts\\Activate.ps1; uvicorn app.main:app --reload",
+      "options": {
+        "shell": {
+          "executable": "powershell.exe"
+        }
+      },
+      "group": "build",
+      "presentation": {
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Start Frontend",
+      "type": "shell",
+      "command": "cd frontend; npm run dev",
+      "group": "build",
+      "presentation": {
+        "panel": "dedicated"
+      }
+    }
+  ]
+} 
