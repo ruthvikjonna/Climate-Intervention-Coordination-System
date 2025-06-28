@@ -1,5 +1,6 @@
 from sqlalchemy import Column, String, Float, DateTime, JSON, Index
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 import uuid
 
@@ -20,6 +21,12 @@ class ClimateGridCell(Base):
     data_source = Column(String, nullable=False)  # "NASA", "Copernicus", etc.
     source_metadata = Column(JSON)  # API details, satellite info
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationships
+    satellite_data = relationship("SatelliteData", back_populates="grid_cell")
+    intervention_impacts = relationship("InterventionImpact", back_populates="grid_cell")
+    optimization_results = relationship("OptimizationResult", back_populates="grid_cell")
+    interventions = relationship("Intervention", back_populates="grid_cell")
 
     # Indexes for performance
     __table_args__ = (
