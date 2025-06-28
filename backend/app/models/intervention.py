@@ -12,6 +12,7 @@ class Intervention(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     operator_id = Column(UUID(as_uuid=True), ForeignKey("operators.id"), nullable=False)
+    grid_cell_id = Column(UUID(as_uuid=True), ForeignKey("climate_grid_cells.id"), nullable=False)
     
     # Basic info
     name = Column(String, nullable=False)
@@ -41,11 +42,14 @@ class Intervention(Base):
 
     # Relationships
     operator = relationship("Operator", back_populates="interventions")
+    grid_cell = relationship("ClimateGridCell", back_populates="interventions")
+    impacts = relationship("InterventionImpact", back_populates="intervention")
 
     # Indexes for performance
     __table_args__ = (
         Index('idx_interventions_geospatial', 'latitude', 'longitude'),
         Index('idx_interventions_operator', 'operator_id'),
+        Index('idx_interventions_grid_cell', 'grid_cell_id'),
         Index('idx_interventions_type', 'intervention_type'),
         Index('idx_interventions_status', 'status'),
         Index('idx_interventions_timeline', 'start_date', 'end_date'),
