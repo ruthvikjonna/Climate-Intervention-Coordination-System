@@ -2,6 +2,7 @@
 import { useRef, useEffect, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { fetchInterventions } from '../services/api';
 
 // Use environment variable for Mapbox access token
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || '';
@@ -34,22 +35,11 @@ export default function OperatorIntelligenceDashboard() {
 
   // Fetch interventions from your FastAPI backend
   useEffect(() => {
-    const fetchInterventions = async () => {
-      try {
-        const response = await fetch('http://localhost:8000/api/v1/interventions/');
-        if (!response.ok) {
-          throw new Error('Failed to fetch interventions');
-        }
-        const data = await response.json();
-        setInterventions(data.interventions || []);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch interventions');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchInterventions();
+    setLoading(true);
+    fetchInterventions()
+      .then(data => setInterventions(data.interventions || data))
+      .catch(err => setError(err.message || 'Failed to fetch interventions'))
+      .finally(() => setLoading(false));
   }, []);
 
   // Initialize map
