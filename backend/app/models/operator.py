@@ -20,6 +20,7 @@ class Operator(Base):
 
     # Relationships
     interventions = relationship("Intervention", back_populates="operator")
+    optimization_results = relationship("OptimizationResult", back_populates="operator")
 
     # Indexes for performance
     __table_args__ = (
