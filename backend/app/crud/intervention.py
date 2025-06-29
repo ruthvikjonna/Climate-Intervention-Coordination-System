@@ -1,123 +1,140 @@
-from typing import List, Optional
-from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_, func
+from typing import List, Optional, Tuple
+from supabase import Client
 from datetime import datetime
+from uuid import UUID
 
-from app.models.intervention import Intervention
-from app.schemas.intervention import InterventionCreate, InterventionUpdate
+from app.schemas.intervention import InterventionCreate, InterventionUpdate, InterventionInDB
 
 
 class InterventionCRUD:
-    """CRUD operations for Intervention model"""
+    """CRUD operations for Intervention model using Supabase"""
 
-    def create(self, db: Session, obj_in: InterventionCreate) -> Intervention:
-        """Create a new intervention using dynamic field assignment"""
+    def create(self, supabase: Client, obj_in: InterventionCreate) -> InterventionInDB:
+        """Create a new intervention"""
         obj_data = obj_in.model_dump(exclude_none=True)
-        db_obj = Intervention(**obj_data)
-        db.add(db_obj)
-        db.commit()
-        db.refresh(db_obj)
-        return db_obj
+        
+        # Insert into Supabase
+        result = supabase.table("interventions").insert(obj_data).execute()
+        
+        if not result.data:
+            raise Exception("Failed to create intervention")
+        
+        return InterventionInDB(**result.data[0])
 
-    def get(self, db: Session, id: int) -> Optional[Intervention]:
+    def get(self, supabase: Client, id: UUID) -> Optional[InterventionInDB]:
         """Get intervention by ID"""
-        return db.query(Intervention).filter(Intervention.id == id).first()
+        result = supabase.table("interventions").select("*").eq("id", str(id)).execute()
+        
+        if not result.data:
+            return None
+        
+        return InterventionInDB(**result.data[0])
 
     def get_multi(
         self, 
-        db: Session, 
+        supabase: Client, 
         *, 
         skip: int = 0, 
         limit: int = 100,
         intervention_type: Optional[str] = None,
-        operator: Optional[str] = None,
+        operator_id: Optional[UUID] = None,
         status: Optional[str] = None,
         search: Optional[str] = None
-    ) -> tuple[List[Intervention], int]:
+    ) -> Tuple[List[InterventionInDB], int]:
         """Get multiple interventions with optional filtering and pagination"""
-        query = db.query(Intervention)
+        query = supabase.table("interventions").select("*", count="exact")
         
         # Apply filters
         if intervention_type:
-            query = query.filter(Intervention.intervention_type == intervention_type)
-        if operator:
-            query = query.filter(Intervention.operator == operator)
+            query = query.eq("intervention_type", intervention_type)
+        if operator_id:
+            query = query.eq("operator_id", str(operator_id))
         if status:
-            query = query.filter(Intervention.status == status)
+            query = query.eq("status", status)
         if search:
-            search_filter = or_(
-                Intervention.name.ilike(f"%{search}%"),
-                Intervention.description.ilike(f"%{search}%"),
-                Intervention.operator.ilike(f"%{search}%")
-            )
-            query = query.filter(search_filter)
-        
-        # Get total count for pagination
-        total = query.count()
+            query = query.or_(f"name.ilike.%{search}%,description.ilike.%{search}%")
         
         # Apply pagination
-        interventions = query.offset(skip).limit(limit).all()
+        query = query.range(skip, skip + limit - 1)
+        
+        result = query.execute()
+        
+        interventions = [InterventionInDB(**item) for item in result.data]
+        total = result.count or 0
         
         return interventions, total
 
     def update(
         self, 
-        db: Session, 
+        supabase: Client, 
         *, 
-        db_obj: Intervention, 
+        id: UUID,
         obj_in: InterventionUpdate
-    ) -> Intervention:
-        """Update an intervention using dynamic field assignment"""
+    ) -> Optional[InterventionInDB]:
+        """Update an intervention"""
         update_data = obj_in.model_dump(exclude_unset=True, exclude_none=True)
         
-        for field, value in update_data.items():
-            setattr(db_obj, field, value)
+        if not update_data:
+            return self.get(supabase, id)
         
-        db.add(db_obj)
-        db.commit()
-        db.refresh(db_obj)
-        return db_obj
+        # Add updated_at timestamp
+        update_data["updated_at"] = datetime.utcnow().isoformat()
+        
+        result = supabase.table("interventions").update(update_data).eq("id", str(id)).execute()
+        
+        if not result.data:
+            return None
+        
+        return InterventionInDB(**result.data[0])
 
-    def delete(self, db: Session, *, id: int) -> Optional[Intervention]:
+    def delete(self, supabase: Client, *, id: UUID) -> bool:
         """Delete an intervention"""
-        obj = db.query(Intervention).get(id)
-        if obj:
-            db.delete(obj)
-            db.commit()
-        return obj
+        result = supabase.table("interventions").delete().eq("id", str(id)).execute()
+        return len(result.data) > 0
 
-    def get_by_operator(self, db: Session, operator: str) -> List[Intervention]:
+    def get_by_operator(self, supabase: Client, operator_id: UUID) -> List[InterventionInDB]:
         """Get all interventions by a specific operator"""
-        return db.query(Intervention).filter(Intervention.operator == operator).all()
+        result = supabase.table("interventions").select("*").eq("operator_id", str(operator_id)).execute()
+        return [InterventionInDB(**item) for item in result.data]
 
-    def get_by_type(self, db: Session, intervention_type: str) -> List[Intervention]:
+    def get_by_type(self, supabase: Client, intervention_type: str) -> List[InterventionInDB]:
         """Get all interventions of a specific type"""
-        return db.query(Intervention).filter(Intervention.intervention_type == intervention_type).all()
+        result = supabase.table("interventions").select("*").eq("intervention_type", intervention_type).execute()
+        return [InterventionInDB(**item) for item in result.data]
 
-    def get_by_status(self, db: Session, status: str) -> List[Intervention]:
+    def get_by_status(self, supabase: Client, status: str) -> List[InterventionInDB]:
         """Get all interventions with a specific status"""
-        return db.query(Intervention).filter(Intervention.status == status).all()
+        result = supabase.table("interventions").select("*").eq("status", status).execute()
+        return [InterventionInDB(**item) for item in result.data]
 
-    def get_total_capacity(self, db: Session) -> float:
-        """Get total CO2 removal capacity across all interventions"""
-        result = db.query(func.sum(Intervention.capacity_tonnes_co2)).scalar()
-        return result or 0.0
+    def get_total_capacity(self, supabase: Client) -> float:
+        """Get total scale amount across all interventions"""
+        result = supabase.table("interventions").select("scale_amount").execute()
+        return sum(item.get("scale_amount", 0) for item in result.data)
 
-    def get_capacity_by_type(self, db: Session) -> List[dict]:
-        """Get CO2 removal capacity grouped by intervention type"""
-        result = db.query(
-            Intervention.intervention_type,
-            func.sum(Intervention.capacity_tonnes_co2).label('total_capacity'),
-            func.count(Intervention.id).label('count')
-        ).group_by(Intervention.intervention_type).all()
+    def get_capacity_by_type(self, supabase: Client) -> List[dict]:
+        """Get scale amount grouped by intervention type"""
+        result = supabase.table("interventions").select("intervention_type, scale_amount").execute()
+        
+        # Group by intervention type
+        grouped = {}
+        for item in result.data:
+            intervention_type = item["intervention_type"]
+            scale_amount = item.get("scale_amount", 0)
+            
+            if intervention_type not in grouped:
+                grouped[intervention_type] = {"total_scale": 0, "count": 0}
+            
+            grouped[intervention_type]["total_scale"] += scale_amount
+            grouped[intervention_type]["count"] += 1
         
         return [
             {
-                "intervention_type": row.intervention_type,
-                "total_capacity": row.total_capacity or 0.0,
-                "count": row.count
+                "intervention_type": intervention_type,
+                "total_scale": data["total_scale"],
+                "count": data["count"]
             }
-            for row in result
+            for intervention_type, data in grouped.items()
         ]
 
 
