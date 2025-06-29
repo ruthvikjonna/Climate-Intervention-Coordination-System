@@ -1,8 +1,8 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy.orm import Session
+from uuid import UUID
 
-from app.core.database import get_db
+from app.core.database import get_supabase
 from app.crud.intervention import intervention
 from app.schemas.intervention import (
     InterventionCreate,
@@ -17,23 +17,23 @@ router = APIRouter()
 @router.post("/", response_model=InterventionResponse, status_code=status.HTTP_201_CREATED)
 def create_intervention(
     *,
-    db: Session = Depends(get_db),
+    supabase=Depends(get_supabase),
     intervention_in: InterventionCreate,
 ) -> InterventionResponse:
     """
     Create a new intervention.
     """
-    intervention_obj = intervention.create(db=db, obj_in=intervention_in)
+    intervention_obj = intervention.create(supabase=supabase, obj_in=intervention_in)
     return intervention_obj
 
 
 @router.get("/", response_model=InterventionListResponse)
 def read_interventions(
-    db: Session = Depends(get_db),
+    supabase=Depends(get_supabase),
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Number of records to return"),
     intervention_type: Optional[str] = Query(None, description="Filter by intervention type"),
-    operator: Optional[str] = Query(None, description="Filter by operator"),
+    operator_id: Optional[UUID] = Query(None, description="Filter by operator ID"),
     status: Optional[str] = Query(None, description="Filter by status"),
     search: Optional[str] = Query(None, description="Search in name, description, or operator"),
 ) -> InterventionListResponse:
@@ -41,11 +41,11 @@ def read_interventions(
     Retrieve interventions with optional filtering and pagination.
     """
     interventions, total = intervention.get_multi(
-        db=db,
+        supabase=supabase,
         skip=skip,
         limit=limit,
         intervention_type=intervention_type,
-        operator=operator,
+        operator_id=operator_id,
         status=status,
         search=search
     )
@@ -65,13 +65,13 @@ def read_interventions(
 @router.get("/{intervention_id}", response_model=InterventionResponse)
 def read_intervention(
     *,
-    db: Session = Depends(get_db),
-    intervention_id: int,
+    supabase=Depends(get_supabase),
+    intervention_id: UUID,
 ) -> InterventionResponse:
     """
     Get intervention by ID.
     """
-    intervention_obj = intervention.get(db=db, id=intervention_id)
+    intervention_obj = intervention.get(supabase=supabase, id=intervention_id)
     if not intervention_obj:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -83,97 +83,96 @@ def read_intervention(
 @router.put("/{intervention_id}", response_model=InterventionResponse)
 def update_intervention(
     *,
-    db: Session = Depends(get_db),
-    intervention_id: int,
+    supabase=Depends(get_supabase),
+    intervention_id: UUID,
     intervention_in: InterventionUpdate,
 ) -> InterventionResponse:
     """
     Update an intervention.
     """
-    intervention_obj = intervention.get(db=db, id=intervention_id)
+    intervention_obj = intervention.update(supabase=supabase, id=intervention_id, obj_in=intervention_in)
     if not intervention_obj:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Intervention not found"
         )
-    intervention_obj = intervention.update(db=db, db_obj=intervention_obj, obj_in=intervention_in)
     return intervention_obj
 
 
-@router.delete("/{intervention_id}", response_model=InterventionResponse)
+@router.delete("/{intervention_id}")
 def delete_intervention(
     *,
-    db: Session = Depends(get_db),
-    intervention_id: int,
-) -> InterventionResponse:
+    supabase=Depends(get_supabase),
+    intervention_id: UUID,
+) -> dict:
     """
     Delete an intervention.
     """
-    intervention_obj = intervention.delete(db=db, id=intervention_id)
-    if not intervention_obj:
+    success = intervention.delete(supabase=supabase, id=intervention_id)
+    if not success:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Intervention not found"
         )
-    return intervention_obj
+    return {"message": "Intervention deleted successfully"}
 
 
-@router.get("/operator/{operator}", response_model=List[InterventionResponse])
+@router.get("/operator/{operator_id}", response_model=List[InterventionResponse])
 def read_interventions_by_operator(
     *,
-    db: Session = Depends(get_db),
-    operator: str,
+    supabase=Depends(get_supabase),
+    operator_id: UUID,
 ) -> List[InterventionResponse]:
     """
     Get all interventions by a specific operator.
     """
-    interventions = intervention.get_by_operator(db=db, operator=operator)
+    interventions = intervention.get_by_operator(supabase=supabase, operator_id=operator_id)
     return interventions
 
 
 @router.get("/type/{intervention_type}", response_model=List[InterventionResponse])
 def read_interventions_by_type(
     *,
-    db: Session = Depends(get_db),
+    supabase=Depends(get_supabase),
     intervention_type: str,
 ) -> List[InterventionResponse]:
     """
     Get all interventions of a specific type.
     """
-    interventions = intervention.get_by_type(db=db, intervention_type=intervention_type)
+    interventions = intervention.get_by_type(supabase=supabase, intervention_type=intervention_type)
     return interventions
 
 
 @router.get("/status/{status}", response_model=List[InterventionResponse])
 def read_interventions_by_status(
     *,
-    db: Session = Depends(get_db),
+    supabase=Depends(get_supabase),
     status: str,
 ) -> List[InterventionResponse]:
     """
     Get all interventions with a specific status.
     """
-    interventions = intervention.get_by_status(db=db, status=status)
+    interventions = intervention.get_by_status(supabase=supabase, status=status)
     return interventions
 
 
-@router.get("/stats/total-capacity")
-def get_total_capacity(
-    db: Session = Depends(get_db),
+@router.get("/stats/total-scale")
+def get_total_scale(
+    supabase=Depends(get_supabase),
 ) -> dict:
     """
-    Get total CO2 removal capacity across all interventions.
+    Get total scale amount across all interventions.
     """
-    total_capacity = intervention.get_total_capacity(db=db)
-    return {"total_capacity_tonnes_co2": total_capacity}
+    total_scale = intervention.get_total_capacity(supabase=supabase)
+    return {"total_scale_amount": total_scale}
 
 
-@router.get("/stats/capacity-by-type")
-def get_capacity_by_type(
-    db: Session = Depends(get_db),
+@router.get("/stats/scale-by-type")
+def get_scale_by_type(
+    supabase=Depends(get_supabase),
 ) -> List[dict]:
     """
-    Get CO2 removal capacity grouped by intervention type.
+    Get scale amount grouped by intervention type.
     """
-    capacity_by_type = intervention.get_capacity_by_type(db=db)
-    return capacity_by_type 
+    scale_by_type = intervention.get_capacity_by_type(supabase=supabase)
+    return scale_by_type 
