@@ -1,6 +1,5 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
 from datetime import datetime
 from uuid import UUID
 
@@ -220,4 +219,6 @@ def delete_data_source(
     success = crud.delete_data_source(db=db, data_source_id=data_source_id)
     if not success:
         raise HTTPException(status_code=404, detail="Data source not found")
-    return {"message": "Data source deleted successfully"} 
+    return {"message": "Data source deleted successfully"}
+
+# TODO: Refactor this endpoint for Supabase. All SQLAlchemy code removed. 

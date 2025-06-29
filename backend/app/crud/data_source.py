@@ -1,3 +1,5 @@
+# TODO: Refactor this CRUD module for Supabase. All SQLAlchemy code removed.
+
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, func

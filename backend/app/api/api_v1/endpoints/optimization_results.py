@@ -1,16 +1,9 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
 from datetime import datetime
 from uuid import UUID
 
-from app.core.database import get_db
-from app.crud import optimization_result as crud
-from app.schemas.optimization_result import (
-    OptimizationResult, 
-    OptimizationResultCreate, 
-    OptimizationResultUpdate
-)
+# TODO: Refactor this endpoint for Supabase. All SQLAlchemy code removed.
 
 router = APIRouter()
 

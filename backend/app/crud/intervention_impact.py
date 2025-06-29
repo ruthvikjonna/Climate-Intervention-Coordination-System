@@ -1,8 +1,5 @@
 from typing import List, Optional, Dict, Any
-from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_, func
-from datetime import datetime, timedelta
-from uuid import UUID
+# TODO: Refactor this CRUD module for Supabase. All SQLAlchemy code removed.
 
 from app.models.intervention_impact import InterventionImpact
 from app.schemas.intervention_impact import InterventionImpactCreate, InterventionImpactUpdate
