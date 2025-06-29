@@ -1,23 +1,27 @@
-from datetime import datetime
-from typing import Optional
+from datetime import datetime, date
+from typing import Optional, Dict, Any
 from pydantic import BaseModel, Field
+from uuid import UUID
 
 
 class InterventionBase(BaseModel):
     """Base schema for intervention data"""
+    operator_id: UUID = Field(..., description="ID of the operator")
+    grid_cell_id: UUID = Field(..., description="ID of the climate grid cell")
     name: str = Field(..., description="Name of the intervention")
     description: Optional[str] = Field(None, description="Description of the intervention")
-    intervention_type: str = Field(..., description="Type of intervention (e.g., biochar, DAC, reforestation)")
-    location_lat: float = Field(..., description="Latitude of intervention location")
-    location_lon: float = Field(..., description="Longitude of intervention location")
-    deployment_date: datetime = Field(..., description="Date when intervention was deployed")
-    capacity_tonnes_co2: float = Field(..., description="CO2 removal capacity in tonnes")
+    intervention_type: str = Field(..., description="Type of intervention (e.g., biochar, DAC, afforestation, SRM)")
     status: str = Field(..., description="Current status of the intervention")
-    operator: str = Field(..., description="Organization or entity operating the intervention")
-    cost_per_tonne: Optional[float] = Field(None, description="Cost per tonne of CO2 removed")
-    technology_readiness_level: Optional[int] = Field(None, ge=1, le=9, description="Technology readiness level (1-9)")
-    verification_method: Optional[str] = Field(None, description="Method used to verify CO2 removal")
-    expected_lifetime_years: Optional[int] = Field(None, description="Expected operational lifetime in years")
+    latitude: float = Field(..., description="Latitude of intervention location")
+    longitude: float = Field(..., description="Longitude of intervention location")
+    region_name: Optional[str] = Field(None, description="Name of the region")
+    scale_amount: float = Field(..., description="Scale amount (tonnes, hectares, etc.)")
+    scale_unit: str = Field(..., description="Unit of scale (tonnes_co2, hectares, kg_aerosol)")
+    cost_usd: Optional[float] = Field(None, description="Cost in USD")
+    start_date: Optional[date] = Field(None, description="Start date of intervention")
+    end_date: Optional[date] = Field(None, description="End date of intervention")
+    duration_months: Optional[int] = Field(None, description="Duration in months")
+    deployment_data: Optional[Dict[str, Any]] = Field(None, description="Specific intervention details")
 
 
 class InterventionCreate(InterventionBase):
@@ -27,24 +31,27 @@ class InterventionCreate(InterventionBase):
 
 class InterventionUpdate(BaseModel):
     """Schema for updating an intervention - all fields optional"""
+    operator_id: Optional[UUID] = Field(None, description="ID of the operator")
+    grid_cell_id: Optional[UUID] = Field(None, description="ID of the climate grid cell")
     name: Optional[str] = Field(None, description="Name of the intervention")
     description: Optional[str] = Field(None, description="Description of the intervention")
     intervention_type: Optional[str] = Field(None, description="Type of intervention")
-    location_lat: Optional[float] = Field(None, description="Latitude of intervention location")
-    location_lon: Optional[float] = Field(None, description="Longitude of intervention location")
-    deployment_date: Optional[datetime] = Field(None, description="Date when intervention was deployed")
-    capacity_tonnes_co2: Optional[float] = Field(None, description="CO2 removal capacity in tonnes")
     status: Optional[str] = Field(None, description="Current status of the intervention")
-    operator: Optional[str] = Field(None, description="Organization or entity operating the intervention")
-    cost_per_tonne: Optional[float] = Field(None, description="Cost per tonne of CO2 removed")
-    technology_readiness_level: Optional[int] = Field(None, ge=1, le=9, description="Technology readiness level (1-9)")
-    verification_method: Optional[str] = Field(None, description="Method used to verify CO2 removal")
-    expected_lifetime_years: Optional[int] = Field(None, description="Expected operational lifetime in years")
+    latitude: Optional[float] = Field(None, description="Latitude of intervention location")
+    longitude: Optional[float] = Field(None, description="Longitude of intervention location")
+    region_name: Optional[str] = Field(None, description="Name of the region")
+    scale_amount: Optional[float] = Field(None, description="Scale amount")
+    scale_unit: Optional[str] = Field(None, description="Unit of scale")
+    cost_usd: Optional[float] = Field(None, description="Cost in USD")
+    start_date: Optional[date] = Field(None, description="Start date of intervention")
+    end_date: Optional[date] = Field(None, description="End date of intervention")
+    duration_months: Optional[int] = Field(None, description="Duration in months")
+    deployment_data: Optional[Dict[str, Any]] = Field(None, description="Specific intervention details")
 
 
 class InterventionInDB(InterventionBase):
     """Schema for intervention as stored in database"""
-    id: int = Field(..., description="Unique identifier for the intervention")
+    id: UUID = Field(..., description="Unique identifier for the intervention")
     created_at: datetime = Field(..., description="Timestamp when record was created")
     updated_at: datetime = Field(..., description="Timestamp when record was last updated")
 
