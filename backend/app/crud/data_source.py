@@ -8,15 +8,27 @@ from uuid import UUID
 
 from app.models.data_source import DataSource
 from app.schemas.data_source import DataSourceCreate, DataSourceUpdate
+from app.core.supabase_client import supabase
 
 
-def create_data_source(db: Session, data_source: DataSourceCreate) -> DataSource:
-    """Create a new data source record"""
-    db_data_source = DataSource(**data_source.model_dump())
-    db.add(db_data_source)
-    db.commit()
-    db.refresh(db_data_source)
-    return db_data_source
+def create_data_source(data: dict):
+    response = supabase.table("data_sources").insert(data).execute()
+    return response.data
+
+
+def get_data_source_by_id(id: str):
+    response = supabase.table("data_sources").select("*").eq("id", id).single().execute()
+    return response.data
+
+
+def update_data_source(id: str, data: dict):
+    response = supabase.table("data_sources").update(data).eq("id", id).execute()
+    return response.data
+
+
+def delete_data_source(id: str):
+    response = supabase.table("data_sources").delete().eq("id", id).execute()
+    return response.data
 
 
 def get_data_source(db: Session, data_source_id: UUID) -> Optional[DataSource]:
@@ -160,16 +172,6 @@ def update_data_source_status(
         db.commit()
         db.refresh(db_data_source)
     return db_data_source
-
-
-def delete_data_source(db: Session, data_source_id: UUID) -> bool:
-    """Delete data source"""
-    db_data_source = get_data_source(db, data_source_id)
-    if db_data_source:
-        db.delete(db_data_source)
-        db.commit()
-        return True
-    return False
 
 
 def get_data_source_list(

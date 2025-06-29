@@ -3,20 +3,27 @@ from typing import List, Optional, Dict, Any
 
 from app.models.optimization_result import OptimizationResult
 from app.schemas.optimization_result import OptimizationResultCreate, OptimizationResultUpdate
+from app.core.supabase_client import supabase
 
 
-def create_optimization_result(db: Session, result: OptimizationResultCreate) -> OptimizationResult:
-    """Create a new optimization result record"""
-    db_result = OptimizationResult(**result.model_dump())
-    db.add(db_result)
-    db.commit()
-    db.refresh(db_result)
-    return db_result
+def create_optimization_result(data: dict):
+    response = supabase.table("optimization_results").insert(data).execute()
+    return response.data
 
 
-def get_optimization_result(db: Session, result_id: UUID) -> Optional[OptimizationResult]:
-    """Get optimization result by ID"""
-    return db.query(OptimizationResult).filter(OptimizationResult.id == result_id).first()
+def get_optimization_result_by_id(id: str):
+    response = supabase.table("optimization_results").select("*").eq("id", id).single().execute()
+    return response.data
+
+
+def update_optimization_result(id: str, data: dict):
+    response = supabase.table("optimization_results").update(data).eq("id", id).execute()
+    return response.data
+
+
+def delete_optimization_result(id: str):
+    response = supabase.table("optimization_results").delete().eq("id", id).execute()
+    return response.data
 
 
 def get_optimization_results_by_operator(
@@ -132,32 +139,6 @@ def get_optimization_statistics(
     }
     
     return stats
-
-
-def update_optimization_result(
-    db: Session, 
-    result_id: UUID, 
-    result_update: OptimizationResultUpdate
-) -> Optional[OptimizationResult]:
-    """Update optimization result"""
-    db_result = get_optimization_result(db, result_id)
-    if db_result:
-        update_data = result_update.model_dump(exclude_unset=True)
-        for field, value in update_data.items():
-            setattr(db_result, field, value)
-        db.commit()
-        db.refresh(db_result)
-    return db_result
-
-
-def delete_optimization_result(db: Session, result_id: UUID) -> bool:
-    """Delete optimization result"""
-    db_result = get_optimization_result(db, result_id)
-    if db_result:
-        db.delete(db_result)
-        db.commit()
-        return True
-    return False
 
 
 def get_optimization_result_list(

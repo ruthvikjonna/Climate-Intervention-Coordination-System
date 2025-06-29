@@ -8,15 +8,27 @@ from uuid import UUID
 
 from app.models.satellite_data import SatelliteData
 from app.schemas.satellite_data import SatelliteDataCreate, SatelliteDataUpdate
+from app.core.supabase_client import supabase
 
 
-def create_satellite_data(db: Session, satellite_data: SatelliteDataCreate) -> SatelliteData:
-    """Create a new satellite data record"""
-    db_satellite_data = SatelliteData(**satellite_data.model_dump())
-    db.add(db_satellite_data)
-    db.commit()
-    db.refresh(db_satellite_data)
-    return db_satellite_data
+def create_satellite_data(data: dict):
+    response = supabase.table("satellite_data").insert(data).execute()
+    return response.data
+
+
+def get_satellite_data_by_id(id: str):
+    response = supabase.table("satellite_data").select("*").eq("id", id).single().execute()
+    return response.data
+
+
+def update_satellite_data(id: str, data: dict):
+    response = supabase.table("satellite_data").update(data).eq("id", id).execute()
+    return response.data
+
+
+def delete_satellite_data(id: str):
+    response = supabase.table("satellite_data").delete().eq("id", id).execute()
+    return response.data
 
 
 def get_satellite_data(db: Session, satellite_data_id: UUID) -> Optional[SatelliteData]:
@@ -111,32 +123,6 @@ def get_satellite_data_statistics(
     }
     
     return stats
-
-
-def update_satellite_data(
-    db: Session, 
-    satellite_data_id: UUID, 
-    satellite_data_update: SatelliteDataUpdate
-) -> Optional[SatelliteData]:
-    """Update satellite data"""
-    db_satellite_data = get_satellite_data(db, satellite_data_id)
-    if db_satellite_data:
-        update_data = satellite_data_update.model_dump(exclude_unset=True)
-        for field, value in update_data.items():
-            setattr(db_satellite_data, field, value)
-        db.commit()
-        db.refresh(db_satellite_data)
-    return db_satellite_data
-
-
-def delete_satellite_data(db: Session, satellite_data_id: UUID) -> bool:
-    """Delete satellite data"""
-    db_satellite_data = get_satellite_data(db, satellite_data_id)
-    if db_satellite_data:
-        db.delete(db_satellite_data)
-        db.commit()
-        return True
-    return False
 
 
 def get_satellite_data_list(

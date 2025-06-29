@@ -3,20 +3,27 @@ from typing import List, Optional, Dict, Any
 
 from app.models.intervention_impact import InterventionImpact
 from app.schemas.intervention_impact import InterventionImpactCreate, InterventionImpactUpdate
+from app.core.supabase_client import supabase
 
 
-def create_intervention_impact(db: Session, impact: InterventionImpactCreate) -> InterventionImpact:
-    """Create a new intervention impact record"""
-    db_impact = InterventionImpact(**impact.model_dump())
-    db.add(db_impact)
-    db.commit()
-    db.refresh(db_impact)
-    return db_impact
+def create_intervention_impact(data: dict):
+    response = supabase.table("intervention_impacts").insert(data).execute()
+    return response.data
 
 
-def get_intervention_impact(db: Session, impact_id: UUID) -> Optional[InterventionImpact]:
-    """Get intervention impact by ID"""
-    return db.query(InterventionImpact).filter(InterventionImpact.id == impact_id).first()
+def get_intervention_impact_by_id(id: str):
+    response = supabase.table("intervention_impacts").select("*").eq("id", id).single().execute()
+    return response.data
+
+
+def update_intervention_impact(id: str, data: dict):
+    response = supabase.table("intervention_impacts").update(data).eq("id", id).execute()
+    return response.data
+
+
+def delete_intervention_impact(id: str):
+    response = supabase.table("intervention_impacts").delete().eq("id", id).execute()
+    return response.data
 
 
 def get_impacts_by_intervention(
@@ -115,32 +122,6 @@ def get_best_performing_impacts(
         query = query.filter(InterventionImpact.grid_cell_id == grid_cell_id)
     
     return query.order_by(InterventionImpact.effectiveness_score.desc()).limit(limit).all()
-
-
-def update_intervention_impact(
-    db: Session, 
-    impact_id: UUID, 
-    impact_update: InterventionImpactUpdate
-) -> Optional[InterventionImpact]:
-    """Update intervention impact"""
-    db_impact = get_intervention_impact(db, impact_id)
-    if db_impact:
-        update_data = impact_update.model_dump(exclude_unset=True)
-        for field, value in update_data.items():
-            setattr(db_impact, field, value)
-        db.commit()
-        db.refresh(db_impact)
-    return db_impact
-
-
-def delete_intervention_impact(db: Session, impact_id: UUID) -> bool:
-    """Delete intervention impact"""
-    db_impact = get_intervention_impact(db, impact_id)
-    if db_impact:
-        db.delete(db_impact)
-        db.commit()
-        return True
-    return False
 
 
 def get_impact_list(
