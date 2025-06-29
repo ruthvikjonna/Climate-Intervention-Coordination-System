@@ -1,52 +1,39 @@
 import os
 import pytest
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker, clear_mappers
-from app.core.database import Base
+from supabase import create_client, Client
+from app.core.database import get_supabase
 from app.main import app
 from fastapi.testclient import TestClient
 
-# Use a dedicated Postgres test DB for scalable, realistic testing
-TEST_DATABASE_URL = os.getenv("TEST_DATABASE_URL", "postgresql://postgres:EqyWgcdCiDhJhuzp@db.rfisuddrymhjkzjertzc.supabase.co:5432/postgres")
+# Use Supabase test project for testing
+TEST_SUPABASE_URL = os.getenv("TEST_SUPABASE_URL", "your_test_supabase_url")
+TEST_SUPABASE_KEY = os.getenv("TEST_SUPABASE_KEY", "your_test_supabase_key")
 
-engine = create_engine(TEST_DATABASE_URL)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-@pytest.fixture(scope="session", autouse=True)
-def setup_database():
-    # Drop and recreate all tables at the start of the test session
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
-    yield
-    Base.metadata.drop_all(bind=engine)
+@pytest.fixture(scope="session")
+def test_supabase():
+    """Create a test Supabase client"""
+    return create_client(TEST_SUPABASE_URL, TEST_SUPABASE_KEY)
 
 @pytest.fixture(autouse=True)
-def truncate_tables():
-    # Truncate all tables before each test for isolation
-    with engine.connect() as conn:
-        trans = conn.begin()
-        for table in reversed(Base.metadata.sorted_tables):
-            conn.execute(text(f'TRUNCATE TABLE "{table.name}" RESTART IDENTITY CASCADE;'))
-        trans.commit()
+def cleanup_test_data(test_supabase):
+    """Clean up test data before each test"""
+    # Clean up interventions table
+    test_supabase.table("interventions").delete().neq("id", "00000000-0000-0000-0000-000000000000").execute()
     yield
 
 @pytest.fixture()
-def db():
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+def supabase():
+    """Provide Supabase client for tests"""
+    return test_supabase()
 
 @pytest.fixture()
 def client():
-    def override_get_db():
-        db = TestingSessionLocal()
-        try:
-            yield db
-        finally:
-            db.close()
+    """Provide test client with Supabase dependency override"""
+    def override_get_supabase():
+        return test_supabase()
+    
     app.dependency_overrides = {}
-    app.dependency_overrides["get_db"] = override_get_db
+    app.dependency_overrides[get_supabase] = override_get_supabase
+    
     with TestClient(app) as c:
         yield c 
