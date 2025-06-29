@@ -2,31 +2,48 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from datetime import datetime
 from uuid import UUID
+from app.crud.intervention_impact import (
+    create_intervention_impact,
+    get_intervention_impact_by_id,
+    update_intervention_impact,
+    delete_intervention_impact,
+)
 
 # TODO: Refactor this endpoint for Supabase. All SQLAlchemy code removed.
 
 router = APIRouter()
 
 
-@router.post("/", response_model=InterventionImpact)
-def create_intervention_impact(
-    impact: InterventionImpactCreate,
-    db: Session = Depends(get_db)
-):
-    """Create a new intervention impact record"""
-    return crud.create_intervention_impact(db=db, impact=impact)
+@router.post("/")
+def create(data: dict):
+    result = create_intervention_impact(data)
+    if not result:
+        raise HTTPException(status_code=400, detail="Insert failed")
+    return result
 
 
-@router.get("/{impact_id}", response_model=InterventionImpact)
-def get_intervention_impact(
-    impact_id: UUID,
-    db: Session = Depends(get_db)
-):
-    """Get intervention impact by ID"""
-    db_impact = crud.get_intervention_impact(db, impact_id=impact_id)
-    if db_impact is None:
-        raise HTTPException(status_code=404, detail="Intervention impact not found")
-    return db_impact
+@router.get("/{id}")
+def read(id: str):
+    result = get_intervention_impact_by_id(id)
+    if not result:
+        raise HTTPException(status_code=404, detail="Not found")
+    return result
+
+
+@router.put("/{id}")
+def update(id: str, data: dict):
+    result = update_intervention_impact(id, data)
+    if not result:
+        raise HTTPException(status_code=400, detail="Update failed")
+    return result
+
+
+@router.delete("/{id}")
+def delete(id: str):
+    result = delete_intervention_impact(id)
+    if not result:
+        raise HTTPException(status_code=400, detail="Delete failed")
+    return result
 
 
 @router.get("/", response_model=List[InterventionImpact])
@@ -141,33 +158,4 @@ def get_impact_statistics(
         grid_cell_id=grid_cell_id,
         start_time=start_time,
         end_time=end_time
-    )
-
-
-@router.put("/{impact_id}", response_model=InterventionImpact)
-def update_intervention_impact(
-    impact_id: UUID,
-    impact_update: InterventionImpactUpdate,
-    db: Session = Depends(get_db)
-):
-    """Update intervention impact"""
-    db_impact = crud.update_intervention_impact(
-        db=db,
-        impact_id=impact_id,
-        impact_update=impact_update
-    )
-    if db_impact is None:
-        raise HTTPException(status_code=404, detail="Intervention impact not found")
-    return db_impact
-
-
-@router.delete("/{impact_id}")
-def delete_intervention_impact(
-    impact_id: UUID,
-    db: Session = Depends(get_db)
-):
-    """Delete intervention impact"""
-    success = crud.delete_intervention_impact(db=db, impact_id=impact_id)
-    if not success:
-        raise HTTPException(status_code=404, detail="Intervention impact not found")
-    return {"message": "Intervention impact deleted successfully"} 
+    ) 

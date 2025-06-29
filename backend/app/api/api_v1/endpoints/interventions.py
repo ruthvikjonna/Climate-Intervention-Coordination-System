@@ -3,7 +3,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from uuid import UUID
 
 from app.core.database import get_supabase
-from app.crud.intervention import intervention
+from app.crud.intervention import (
+    create_intervention,
+    get_intervention_by_id,
+    update_intervention,
+    delete_intervention,
+    intervention
+)
 from app.schemas.intervention import (
     InterventionCreate,
     InterventionUpdate,
@@ -15,7 +21,7 @@ router = APIRouter()
 
 
 @router.post("/", response_model=InterventionResponse, status_code=status.HTTP_201_CREATED)
-def create_intervention(
+def create_intervention_endpoint(
     *,
     supabase=Depends(get_supabase),
     intervention_in: InterventionCreate,
@@ -23,8 +29,10 @@ def create_intervention(
     """
     Create a new intervention.
     """
-    intervention_obj = intervention.create(supabase=supabase, obj_in=intervention_in)
-    return intervention_obj
+    result = create_intervention(supabase=supabase, obj_in=intervention_in)
+    if not result:
+        raise HTTPException(status_code=400, detail="Insert failed")
+    return result
 
 
 @router.get("/", response_model=InterventionListResponse)
@@ -71,17 +79,17 @@ def read_intervention(
     """
     Get intervention by ID.
     """
-    intervention_obj = intervention.get(supabase=supabase, id=intervention_id)
-    if not intervention_obj:
+    result = get_intervention_by_id(supabase=supabase, id=intervention_id)
+    if not result:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Intervention not found"
         )
-    return intervention_obj
+    return result
 
 
 @router.put("/{intervention_id}", response_model=InterventionResponse)
-def update_intervention(
+def update_intervention_endpoint(
     *,
     supabase=Depends(get_supabase),
     intervention_id: UUID,
@@ -90,17 +98,14 @@ def update_intervention(
     """
     Update an intervention.
     """
-    intervention_obj = intervention.update(supabase=supabase, id=intervention_id, obj_in=intervention_in)
-    if not intervention_obj:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Intervention not found"
-        )
-    return intervention_obj
+    result = update_intervention(supabase=supabase, id=intervention_id, obj_in=intervention_in)
+    if not result:
+        raise HTTPException(status_code=400, detail="Update failed")
+    return result
 
 
 @router.delete("/{intervention_id}")
-def delete_intervention(
+def delete_intervention_endpoint(
     *,
     supabase=Depends(get_supabase),
     intervention_id: UUID,
@@ -108,12 +113,9 @@ def delete_intervention(
     """
     Delete an intervention.
     """
-    success = intervention.delete(supabase=supabase, id=intervention_id)
-    if not success:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Intervention not found"
-        )
+    result = delete_intervention(supabase=supabase, id=intervention_id)
+    if not result:
+        raise HTTPException(status_code=400, detail="Delete failed")
     return {"message": "Intervention deleted successfully"}
 
 

@@ -2,31 +2,48 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from datetime import datetime
 from uuid import UUID
+from app.crud.optimization_result import (
+    create_optimization_result,
+    get_optimization_result_by_id,
+    update_optimization_result,
+    delete_optimization_result,
+)
 
 # TODO: Refactor this endpoint for Supabase. All SQLAlchemy code removed.
 
 router = APIRouter()
 
 
-@router.post("/", response_model=OptimizationResult)
-def create_optimization_result(
-    result: OptimizationResultCreate,
-    db: Session = Depends(get_db)
-):
-    """Create a new optimization result record"""
-    return crud.create_optimization_result(db=db, result=result)
+@router.post("/")
+def create(data: dict):
+    result = create_optimization_result(data)
+    if not result:
+        raise HTTPException(status_code=400, detail="Insert failed")
+    return result
 
 
-@router.get("/{result_id}", response_model=OptimizationResult)
-def get_optimization_result(
-    result_id: UUID,
-    db: Session = Depends(get_db)
-):
-    """Get optimization result by ID"""
-    db_result = crud.get_optimization_result(db, result_id=result_id)
-    if db_result is None:
-        raise HTTPException(status_code=404, detail="Optimization result not found")
-    return db_result
+@router.get("/{id}")
+def read(id: str):
+    result = get_optimization_result_by_id(id)
+    if not result:
+        raise HTTPException(status_code=404, detail="Not found")
+    return result
+
+
+@router.put("/{id}")
+def update(id: str, data: dict):
+    result = update_optimization_result(id, data)
+    if not result:
+        raise HTTPException(status_code=400, detail="Update failed")
+    return result
+
+
+@router.delete("/{id}")
+def delete(id: str):
+    result = delete_optimization_result(id)
+    if not result:
+        raise HTTPException(status_code=400, detail="Delete failed")
+    return result
 
 
 @router.get("/", response_model=List[OptimizationResult])
@@ -164,33 +181,4 @@ def get_optimization_statistics(
         grid_cell_id=grid_cell_id,
         optimization_type=optimization_type,
         algorithm=algorithm
-    )
-
-
-@router.put("/{result_id}", response_model=OptimizationResult)
-def update_optimization_result(
-    result_id: UUID,
-    result_update: OptimizationResultUpdate,
-    db: Session = Depends(get_db)
-):
-    """Update optimization result"""
-    db_result = crud.update_optimization_result(
-        db=db,
-        result_id=result_id,
-        result_update=result_update
-    )
-    if db_result is None:
-        raise HTTPException(status_code=404, detail="Optimization result not found")
-    return db_result
-
-
-@router.delete("/{result_id}")
-def delete_optimization_result(
-    result_id: UUID,
-    db: Session = Depends(get_db)
-):
-    """Delete optimization result"""
-    success = crud.delete_optimization_result(db=db, result_id=result_id)
-    if not success:
-        raise HTTPException(status_code=404, detail="Optimization result not found")
-    return {"message": "Optimization result deleted successfully"} 
+    ) 

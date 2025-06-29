@@ -4,7 +4,12 @@ from datetime import datetime
 from uuid import UUID
 
 from app.core.database import get_db
-from app.crud import data_source as crud
+from app.crud.data_source import (
+    create_data_source,
+    get_data_source_by_id,
+    update_data_source,
+    delete_data_source,
+)
 from app.schemas.data_source import (
     DataSource, 
     DataSourceCreate, 
@@ -14,42 +19,36 @@ from app.schemas.data_source import (
 router = APIRouter()
 
 
-@router.post("/", response_model=DataSource)
-def create_data_source(
-    data_source: DataSourceCreate,
-    db: Session = Depends(get_db)
-):
-    """Create a new data source record"""
-    # Check if data source with same name already exists
-    existing = crud.get_data_source_by_name(db, name=data_source.name)
-    if existing:
-        raise HTTPException(status_code=400, detail="Data source with this name already exists")
-    
-    return crud.create_data_source(db=db, data_source=data_source)
+@router.post("/")
+def create(data: dict):
+    result = create_data_source(data)
+    if not result:
+        raise HTTPException(status_code=400, detail="Insert failed")
+    return result
 
 
-@router.get("/{data_source_id}", response_model=DataSource)
-def get_data_source(
-    data_source_id: UUID,
-    db: Session = Depends(get_db)
-):
-    """Get data source by ID"""
-    db_data_source = crud.get_data_source(db, data_source_id=data_source_id)
-    if db_data_source is None:
-        raise HTTPException(status_code=404, detail="Data source not found")
-    return db_data_source
+@router.get("/{id}")
+def read(id: str):
+    result = get_data_source_by_id(id)
+    if not result:
+        raise HTTPException(status_code=404, detail="Not found")
+    return result
 
 
-@router.get("/name/{name}", response_model=DataSource)
-def get_data_source_by_name(
-    name: str,
-    db: Session = Depends(get_db)
-):
-    """Get data source by name"""
-    db_data_source = crud.get_data_source_by_name(db, name=name)
-    if db_data_source is None:
-        raise HTTPException(status_code=404, detail="Data source not found")
-    return db_data_source
+@router.put("/{id}")
+def update(id: str, data: dict):
+    result = update_data_source(id, data)
+    if not result:
+        raise HTTPException(status_code=400, detail="Update failed")
+    return result
+
+
+@router.delete("/{id}")
+def delete(id: str):
+    result = delete_data_source(id)
+    if not result:
+        raise HTTPException(status_code=400, detail="Delete failed")
+    return result
 
 
 @router.get("/", response_model=List[DataSource])

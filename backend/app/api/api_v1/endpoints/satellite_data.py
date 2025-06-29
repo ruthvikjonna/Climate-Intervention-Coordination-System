@@ -2,31 +2,48 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from datetime import datetime
 from uuid import UUID
+from app.crud.satellite_data import (
+    create_satellite_data,
+    get_satellite_data_by_id,
+    update_satellite_data,
+    delete_satellite_data,
+)
 
 # TODO: Refactor this endpoint for Supabase. All SQLAlchemy code removed.
 
 router = APIRouter()
 
 
-@router.post("/", response_model=SatelliteData)
-def create_satellite_data(
-    satellite_data: SatelliteDataCreate,
-    db: Session = Depends(get_db)
-):
-    """Create a new satellite data record"""
-    return crud.create_satellite_data(db=db, satellite_data=satellite_data)
+@router.post("/")
+def create(data: dict):
+    result = create_satellite_data(data)
+    if not result:
+        raise HTTPException(status_code=400, detail="Insert failed")
+    return result
 
 
-@router.get("/{satellite_data_id}", response_model=SatelliteData)
-def get_satellite_data(
-    satellite_data_id: UUID,
-    db: Session = Depends(get_db)
-):
-    """Get satellite data by ID"""
-    db_satellite_data = crud.get_satellite_data(db, satellite_data_id=satellite_data_id)
-    if db_satellite_data is None:
-        raise HTTPException(status_code=404, detail="Satellite data not found")
-    return db_satellite_data
+@router.get("/{id}")
+def read(id: str):
+    result = get_satellite_data_by_id(id)
+    if not result:
+        raise HTTPException(status_code=404, detail="Not found")
+    return result
+
+
+@router.put("/{id}")
+def update(id: str, data: dict):
+    result = update_satellite_data(id, data)
+    if not result:
+        raise HTTPException(status_code=400, detail="Update failed")
+    return result
+
+
+@router.delete("/{id}")
+def delete(id: str):
+    result = delete_satellite_data(id)
+    if not result:
+        raise HTTPException(status_code=400, detail="Delete failed")
+    return result
 
 
 @router.get("/", response_model=List[SatelliteData])
@@ -132,33 +149,4 @@ def get_satellite_data_statistics(
         satellite_id=satellite_id,
         start_time=start_time,
         end_time=end_time
-    )
-
-
-@router.put("/{satellite_data_id}", response_model=SatelliteData)
-def update_satellite_data(
-    satellite_data_id: UUID,
-    satellite_data_update: SatelliteDataUpdate,
-    db: Session = Depends(get_db)
-):
-    """Update satellite data"""
-    db_satellite_data = crud.update_satellite_data(
-        db=db,
-        satellite_data_id=satellite_data_id,
-        satellite_data_update=satellite_data_update
-    )
-    if db_satellite_data is None:
-        raise HTTPException(status_code=404, detail="Satellite data not found")
-    return db_satellite_data
-
-
-@router.delete("/{satellite_data_id}")
-def delete_satellite_data(
-    satellite_data_id: UUID,
-    db: Session = Depends(get_db)
-):
-    """Delete satellite data"""
-    success = crud.delete_satellite_data(db=db, satellite_data_id=satellite_data_id)
-    if not success:
-        raise HTTPException(status_code=404, detail="Satellite data not found")
-    return {"message": "Satellite data deleted successfully"} 
+    ) 
