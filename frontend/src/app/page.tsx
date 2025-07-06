@@ -32,6 +32,13 @@ export default function OperatorIntelligenceDashboard() {
   const [interventions, setInterventions] = useState<Intervention[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [nasaPopup, setNasaPopup] = useState<{
+    lng: number;
+    lat: number;
+    data: any;
+  } | null>(null);
+  const [nasaLoading, setNasaLoading] = useState(false);
+  const [nasaError, setNasaError] = useState<string | null>(null);
 
   // Fetch interventions from your FastAPI backend
   useEffect(() => {
@@ -112,6 +119,32 @@ export default function OperatorIntelligenceDashboard() {
       map.current.fitBounds(bounds, { padding: 50 });
     }
   }, [interventions]);
+
+  useEffect(() => {
+    if (map.current) {
+      map.current.on('click', async (e) => {
+        const { lng, lat } = e.lngLat;
+        setNasaLoading(true);
+        setNasaError(null);
+        setNasaPopup(null);
+        try {
+          const res = await fetch(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/climate-data/optimization?lat=${lat}&lon=${lng}`
+          );
+          const json = await res.json();
+          if (json.success) {
+            setNasaPopup({ lng, lat, data: json.data });
+          } else {
+            setNasaError(json.error || 'Failed to fetch NASA data');
+          }
+        } catch (err: any) {
+          setNasaError(err.message || 'Failed to fetch NASA data');
+        } finally {
+          setNasaLoading(false);
+        }
+      });
+    }
+  }, []);
 
   const getMarkerColor = (interventionType: string): string => {
     const colors: { [key: string]: string } = {
@@ -217,6 +250,47 @@ export default function OperatorIntelligenceDashboard() {
           ))}
         </div>
       </div>
+
+      {nasaPopup && (
+        <div
+          className="absolute z-50 bg-white rounded-lg shadow-lg p-4"
+          style={{
+            left: '50%',
+            top: 120,
+            transform: 'translateX(-50%)',
+            minWidth: 320,
+            maxWidth: 400,
+          }}
+        >
+          <button
+            className="absolute top-2 right-2 text-gray-400 hover:text-gray-700"
+            onClick={() => setNasaPopup(null)}
+          >
+            ×
+          </button>
+          <h3 className="font-bold text-lg mb-2">NASA Climate Data</h3>
+          <div className="text-sm text-gray-700">
+            <div><b>Location:</b> {nasaPopup.lat.toFixed(4)}, {nasaPopup.lng.toFixed(4)}</div>
+            <div><b>CO₂:</b> {nasaPopup.data.current_conditions?.co2?.co2_concentration} ppm</div>
+            <div><b>Temperature:</b> {nasaPopup.data.current_conditions?.temperature?.temperature}°C</div>
+            <div><b>Biomass:</b> {nasaPopup.data.current_conditions?.biomass?.biomass_density} t/ha</div>
+            <div><b>Optimal Intervention:</b> {nasaPopup.data.intervention_recommendations?.optimal_intervention_type}</div>
+            <div><b>Priority:</b> {nasaPopup.data.intervention_recommendations?.deployment_priority}</div>
+            <div><b>Expected Impact:</b> {nasaPopup.data.intervention_recommendations?.expected_impact}</div>
+          </div>
+        </div>
+      )}
+      {nasaLoading && (
+        <div className="absolute z-50 left-1/2 top-32 transform -translate-x-1/2 bg-white rounded shadow p-4">
+          <span>Loading NASA data...</span>
+        </div>
+      )}
+      {nasaError && (
+        <div className="absolute z-50 left-1/2 top-32 transform -translate-x-1/2 bg-red-100 text-red-700 rounded shadow p-4">
+          <span>Error: {nasaError}</span>
+          <button className="ml-2 text-gray-500" onClick={() => setNasaError(null)}>×</button>
+        </div>
+      )}
     </div>
   );
 }
