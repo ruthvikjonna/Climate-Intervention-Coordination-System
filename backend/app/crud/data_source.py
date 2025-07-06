@@ -6,28 +6,28 @@ from sqlalchemy import and_, or_, func
 from datetime import datetime, timedelta
 from uuid import UUID
 
-from app.models.data_source import DataSource
+from app.schemas.data_source import DataSource
 from app.schemas.data_source import DataSourceCreate, DataSourceUpdate
-from app.core.supabase_client import supabase
+from app.core.supabase_client import get_supabase
 
 
 def create_data_source(data: dict):
-    response = supabase.table("data_sources").insert(data).execute()
+    response = get_supabase().table("data_sources").insert(data).execute()
     return response.data
 
 
 def get_data_source_by_id(id: str):
-    response = supabase.table("data_sources").select("*").eq("id", id).single().execute()
+    response = get_supabase().table("data_sources").select("*").eq("id", id).single().execute()
     return response.data
 
 
 def update_data_source(id: str, data: dict):
-    response = supabase.table("data_sources").update(data).eq("id", id).execute()
+    response = get_supabase().table("data_sources").update(data).eq("id", id).execute()
     return response.data
 
 
 def delete_data_source(id: str):
-    response = supabase.table("data_sources").delete().eq("id", id).execute()
+    response = get_supabase().table("data_sources").delete().eq("id", id).execute()
     return response.data
 
 

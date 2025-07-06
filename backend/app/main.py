@@ -3,25 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.api_v1.api import api_router
-from app.core.database import engine
-from app.models import (
-    intervention, 
-    climate_grid_cell, 
-    operator, 
-    satellite_data, 
-    intervention_impact, 
-    optimization_result, 
-    data_source
-)
-
-# Create database tables
-intervention.Base.metadata.create_all(bind=engine)
-climate_grid_cell.Base.metadata.create_all(bind=engine)
-operator.Base.metadata.create_all(bind=engine)
-satellite_data.Base.metadata.create_all(bind=engine)
-intervention_impact.Base.metadata.create_all(bind=engine)
-optimization_result.Base.metadata.create_all(bind=engine)
-data_source.Base.metadata.create_all(bind=engine)
 
 # Create FastAPI app
 app = FastAPI(

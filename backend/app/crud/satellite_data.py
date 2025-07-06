@@ -6,28 +6,28 @@ from sqlalchemy import and_, or_, func
 from datetime import datetime, timedelta
 from uuid import UUID
 
-from app.models.satellite_data import SatelliteData
+from app.schemas.satellite_data import SatelliteData
 from app.schemas.satellite_data import SatelliteDataCreate, SatelliteDataUpdate
-from app.core.supabase_client import supabase
+from app.core.supabase_client import get_supabase
 
 
 def create_satellite_data(data: dict):
-    response = supabase.table("satellite_data").insert(data).execute()
+    response = get_supabase().table("satellite_data").insert(data).execute()
     return response.data
 
 
 def get_satellite_data_by_id(id: str):
-    response = supabase.table("satellite_data").select("*").eq("id", id).single().execute()
+    response = get_supabase().table("satellite_data").select("*").eq("id", id).single().execute()
     return response.data
 
 
 def update_satellite_data(id: str, data: dict):
-    response = supabase.table("satellite_data").update(data).eq("id", id).execute()
+    response = get_supabase().table("satellite_data").update(data).eq("id", id).execute()
     return response.data
 
 
 def delete_satellite_data(id: str):
-    response = supabase.table("satellite_data").delete().eq("id", id).execute()
+    response = get_supabase().table("satellite_data").delete().eq("id", id).execute()
     return response.data
 
 

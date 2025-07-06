@@ -2,7 +2,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from uuid import UUID
 
-from app.core.database import get_supabase
+from app.core.supabase_client import get_supabase
 from app.crud.intervention import (
     create_intervention,
     get_intervention_by_id,

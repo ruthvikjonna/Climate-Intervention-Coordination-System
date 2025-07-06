@@ -4,7 +4,7 @@ from datetime import datetime
 from uuid import UUID
 
 from app.schemas.intervention import InterventionCreate, InterventionUpdate, InterventionInDB
-from app.core.supabase_client import supabase
+from app.core.supabase_client import get_supabase
 
 
 class InterventionCRUD:
@@ -15,7 +15,7 @@ class InterventionCRUD:
         obj_data = obj_in.model_dump(exclude_none=True)
         
         # Insert into Supabase
-        response = supabase.table("interventions").insert(obj_data).execute()
+        response = get_supabase().table("interventions").insert(obj_data).execute()
         
         if not response.data:
             raise Exception("Failed to create intervention")
@@ -24,7 +24,7 @@ class InterventionCRUD:
 
     def get(self, supabase: Client, id: UUID) -> Optional[InterventionInDB]:
         """Get intervention by ID"""
-        response = supabase.table("interventions").select("*").eq("id", str(id)).single().execute()
+        response = get_supabase().table("interventions").select("*").eq("id", str(id)).single().execute()
         
         if not response.data:
             return None
@@ -43,7 +43,7 @@ class InterventionCRUD:
         search: Optional[str] = None
     ) -> Tuple[List[InterventionInDB], int]:
         """Get multiple interventions with optional filtering and pagination"""
-        query = supabase.table("interventions").select("*", count="exact")
+        query = get_supabase().table("interventions").select("*", count="exact")
         
         # Apply filters
         if intervention_type:
@@ -81,7 +81,7 @@ class InterventionCRUD:
         # Add updated_at timestamp
         update_data["updated_at"] = datetime.utcnow().isoformat()
         
-        response = supabase.table("interventions").update(update_data).eq("id", str(id)).execute()
+        response = get_supabase().table("interventions").update(update_data).eq("id", str(id)).execute()
         
         if not response.data:
             return None
@@ -90,32 +90,32 @@ class InterventionCRUD:
 
     def delete(self, supabase: Client, *, id: UUID) -> bool:
         """Delete an intervention"""
-        response = supabase.table("interventions").delete().eq("id", str(id)).execute()
+        response = get_supabase().table("interventions").delete().eq("id", str(id)).execute()
         return len(response.data) > 0
 
     def get_by_operator(self, supabase: Client, operator_id: UUID) -> List[InterventionInDB]:
         """Get all interventions by a specific operator"""
-        response = supabase.table("interventions").select("*").eq("operator_id", str(operator_id)).execute()
+        response = get_supabase().table("interventions").select("*").eq("operator_id", str(operator_id)).execute()
         return [InterventionInDB(**item) for item in response.data]
 
     def get_by_type(self, supabase: Client, intervention_type: str) -> List[InterventionInDB]:
         """Get all interventions of a specific type"""
-        response = supabase.table("interventions").select("*").eq("intervention_type", intervention_type).execute()
+        response = get_supabase().table("interventions").select("*").eq("intervention_type", intervention_type).execute()
         return [InterventionInDB(**item) for item in response.data]
 
     def get_by_status(self, supabase: Client, status: str) -> List[InterventionInDB]:
         """Get all interventions with a specific status"""
-        response = supabase.table("interventions").select("*").eq("status", status).execute()
+        response = get_supabase().table("interventions").select("*").eq("status", status).execute()
         return [InterventionInDB(**item) for item in response.data]
 
     def get_total_capacity(self, supabase: Client) -> float:
         """Get total scale amount across all interventions"""
-        response = supabase.table("interventions").select("scale_amount").execute()
+        response = get_supabase().table("interventions").select("scale_amount").execute()
         return sum(item.get("scale_amount", 0) for item in response.data)
 
     def get_capacity_by_type(self, supabase: Client) -> List[dict]:
         """Get scale amount grouped by intervention type"""
-        response = supabase.table("interventions").select("intervention_type, scale_amount").execute()
+        response = get_supabase().table("interventions").select("intervention_type, scale_amount").execute()
         
         # Group by intervention type
         grouped = {}
@@ -144,17 +144,17 @@ intervention = InterventionCRUD()
 
 # --- Supabase CRUD Operations for Interventions ---
 def create_intervention(data: dict):
-    response = supabase.table("interventions").insert(data).execute()
+    response = get_supabase().table("interventions").insert(data).execute()
     return response.data
 
 def get_intervention_by_id(id: str):
-    response = supabase.table("interventions").select("*").eq("id", id).single().execute()
+    response = get_supabase().table("interventions").select("*").eq("id", id).single().execute()
     return response.data
 
 def update_intervention(id: str, data: dict):
-    response = supabase.table("interventions").update(data).eq("id", id).execute()
+    response = get_supabase().table("interventions").update(data).eq("id", id).execute()
     return response.data
 
 def delete_intervention(id: str):
-    response = supabase.table("interventions").delete().eq("id", id).execute()
+    response = get_supabase().table("interventions").delete().eq("id", id).execute()
     return response.data
