@@ -1,3 +1,4 @@
+![Mapbox Globe UI](media/mapbox-globe-ui.png)
 # Planetary Temperature Control Platform MVP
 
 **A Real-Time Climate Intervention Coordination System**
@@ -38,6 +39,7 @@ Built to orchestrate large-scale climate interventions—DAC, biochar, afforesta
 - **Security**: Role-based auth, row-level access, encrypted service tokens
 - **CI/CD**: GitHub Actions for test, lint, deploy; Docker/K8s-ready for scale
 
+![NASA Climate Intelligence Popup](media/nasa-climate-intelligence-popup.png)
 ## Technical Implementation
 
 - **Modular Climate Engine**:
