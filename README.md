@@ -1,144 +1,82 @@
-# Planetary Temperature Control (PTC)
+# Planetary Temperature Control Platform MVP
 
-**Optimizing climate interventions for a sustainable future.**
+**A Real-Time Climate Intervention Coordination System**
 
-## Overview
+Built to orchestrate large-scale climate interventions—DAC, biochar, afforestation—using satellite data, geospatial optimization, and NVIDIA Earth-2 simulations. Developed across multiple technical iterations with real user input, operator pilots, and production-ready architecture.
 
-Planetary Temperature Control (PTC) is the brain behind climate interventions, ensuring optimal deployment of solutions to combat climate change. Our platform serves as the tactical operations system that makes planetary cooling possible by providing real-time data, optimization algorithms, and coordination capabilities for climate intervention operators.
+## Project Overview
 
-**Core Value Proposition**: We are building the "command center" that tells climate operators where, when, and how much to deploy their interventions for maximum planetary cooling impact.
+**PTC** is a full-stack geospatial intelligence platform enabling climate operators to decide _where, when, and how much_ to deploy carbon removal technologies for **maximum cooling effect**.
 
-## Problem Statement
+**Why It Matters**: Today's interventions operate in silos — wasting millions in misallocated capital. PTC solves this by turning climate deployment decisions into **data-driven, real-time, optimized actions**.
 
-Climate interventions today happen in silos. Companies like Charm Industrial optimize for bio-oil, Climeworks for DAC, and Running Tide for kelp, but nobody is orchestrating them together. This lack of coordination leads to:
+## Product Highlights
 
-- Inefficient deployment strategies
-- Suboptimal location selection
-- Wasted resources and missed opportunities
-- Limited visibility into intervention effectiveness
-- Manual data collection taking hundreds of hours
+- **Interactive Global Map** - Real-time visualization of climate metrics and intervention impact
+- **Cooling Forecast Simulation** - NVIDIA Earth-2 integration for regional temperature projections
+- **Multi-Operator Coordination** - Schedules interventions across actors to prevent overlap and boost synergy
+- **Satellite Data Ingestion** - NASA, NOAA, Copernicus feeds auto-ingested and geospatially indexed
+- **Impact Analytics Dashboard** - Deployment ROI, risk, and regulatory overlays
+- **Smart Site Selector** - Predicts top sites based on cost, climate impact, and constraints
 
-## Solution
-
-PTC provides a comprehensive climate intervention coordination platform that:
-
-- **Optimizes deployment locations** using satellite data and geospatial algorithms
-- **Provides real-time recommendations** on timing and scale of interventions
-- **Coordinates multiple operators** to maximize synergies and avoid conflicts
-- **Tracks intervention effectiveness** with continuous monitoring
-- **Automates data collection** from multiple sources and formats
-
-## Key Features
-
-### **Geospatial Intelligence**
-- Real-time satellite data integration (NASA, Copernicus, NOAA)
-- PostGIS-powered geographic optimization
-- Climate modeling and impact prediction
-- Multi-region deployment analysis
-
-### **Smart Optimization Engine**
-- Machine learning algorithms for site selection
-- Cost-effectiveness modeling
-- Climate impact forecasting
-- Cross-intervention synergy detection
-
-### **Mission Control Dashboard**
-- Interactive global maps with intervention visualization
-- Real-time deployment tracking
-- Performance analytics and reporting
-- Collaborative planning tools
-
-### **Data Integration Hub**
-- Automated data collection from utility providers
-- Multi-format data normalization
-- API integrations with existing climate platforms
-- Secure data sharing across organizations
-
-## Technology Stack
+## Architecture & Stack
 
 ### Frontend
-- **Framework**: Next.js with TypeScript
-- **Mapping**: Mapbox GL JS + Deck.gl for geospatial visualization
-- **Authentication**: Supabase Auth with role-based access control
-- **UI**: Responsive design optimized for climate operators
+- **Framework**: Next.js 15 + React 19 + TypeScript
+- **Mapping**: Mapbox GL JS + Deck.gl (custom layers for interventions, biomass, CO₂)
+- **UI/UX**: Tailwind CSS, Framer Motion, Auth pages via Supabase Auth
 
 ### Backend
-- **API**: RESTful + GraphQL hybrid architecture
-- **Database**: Supabase PostgreSQL with PostGIS extensions
-- **Climate Engine**: Python microservices for intervention modeling
-- **ML/AI**: Scikit-learn + XGBoost for impact forecasting
-- **Queue Processing**: Celery for large geospatial queries
+- **APIs**: FastAPI (Python) + REST/GraphQL hybrid for high-flexibility querying
+- **Climate Engine**: NVIDIA Earth2Studio (DLWP) for impact simulation
+- **Queue System**: Celery for async intervention planning and data ingestion
 
-### Data & Infrastructure
-- **Satellite APIs**: NASA Earth Observing System, Copernicus Climate Change Service
-- **Time-Series Storage**: Optimized for climate trends and intervention tracking
-- **Security**: Row-level access control, end-to-end encryption
-- **Deployment**: Docker containerization, Kubernetes-ready
-- **CI/CD**: GitHub Actions for automated testing and deployment
+### Data & Infra
+- **DB**: Supabase PostgreSQL + PostGIS
+- **Satellite APIs**: NASA EarthData, Copernicus C3S, NOAA GFS
+- **Time-Series & Spatial Indexing**: Climate grid tables, intervention logs, ROI zones
+- **Security**: Role-based auth, row-level access, encrypted service tokens
+- **CI/CD**: GitHub Actions for test, lint, deploy; Docker/K8s-ready for scale
 
-## Getting Started
+## Technical Implementation
+
+- **Modular Climate Engine**:
+  - Python models simulate outcomes for DAC, biochar, and afforestation
+  - Outputs: projected °C cooling, CO₂ ppm reduction, intervention score
+
+- **ML-Augmented Climate Engine** *(In Progress)*:
+  - **Lasso/Ridge Regression**: Predict intervention outcomes (CO₂ ppm, °C change) from historical and satellite features
+  - **Random Forest Classifier**: Assess site suitability across High / Medium / Low effectiveness tiers
+  - **Boosting Models**: Rank interventions by predicted impact, cost-efficiency, and regional policy alignment
+  - Enhances Earth2Studio forecasts with empirical performance modeling
+
+- **Dynamic Site Optimization**:
+  - PostGIS queries match interventions to geography, time, and cost-efficiency
+  - Integrates user-selected constraints: terrain, policy, seasonal viability
+
+- **NVIDIA Earth-2 Integration**:
+  - Earth2Studio simulates 6–24 month cooling impact
+  - Supports multiple levers (DAC, biochar, afforestation)
+
+## Core API Endpoints
+PTC exposes a fully RESTful OpenAPI 3.1-compliant backend with endpoints for managing interventions, satellite data, impact simulations, and optimization. See [API_REFERENCE.md](backend/app/api/api_v1/endpoints/API_REFERENCE.md) for full endpoint docs.
+
+## 🔧 Getting Started
 
 ### Prerequisites
 - Node.js 18+
-- Python 3.9+
+- Python 3.11+
 - PostgreSQL with PostGIS
-- Supabase account
-- Mapbox API key
+- Mapbox + Earth2Studio API keys
 
-### Installation
-
+### Quickstart
 ```bash
-# Clone the repository
-git clone https://github.com/your-org/ptc.git
-cd ptc
-
-# Install dependencies
-npm install
-pip install -r requirements.txt
-
-# Set up environment variables
-cp .env.example .env.local
-# Configure your API keys and database connection
-
-# Run database migrations
-npm run db:migrate
-
-# Start development server
+git clone https://github.com/ruthvik-jonna/planetary-temperature-control.git
+cd ptc && npm install && pip install -r requirements.txt
 npm run dev
 ```
 
-### Environment Variables
+### Final Thoughts
+PTC isn't just another climate SaaS—it's the ops layer for Earth's thermostat. We simulate impact before you act, coordinate cross-actor deployments, and make planetary cooling precise, scalable, and actionable.
 
-```env
-# Database
-SUPABASE_URL=your_supabase_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
-
-# Maps
-MAPBOX_ACCESS_TOKEN=your_mapbox_token
-
-# Climate Data APIs
-NASA_API_KEY=your_nasa_api_key
-COPERNICUS_API_KEY=your_copernicus_key
-NOAA_API_KEY=your_noaa_key
-
-# Application
-NEXTAUTH_SECRET=your_auth_secret
-NEXTAUTH_URL=http://localhost:3000
-```
-
-## Development
-
-### Project Structure
-```
-ptc/
-├── apps/
-│   ├── web/                 # Next.js frontend
-│   └── api/                 # Backend services
-├── packages/
-│   ├── ui/                  # Shared UI components
-│   ├── database/            # Database schema and migrations
-│   └── climate-engine/      # Python climate algorithms
-├── docs/                    # Documentation
-└── tools/                   # Development tools
-```
+**"It's SimCity for the atmosphere—but real, and deployable."**
