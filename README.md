@@ -63,7 +63,7 @@ Built to orchestrate large-scale climate interventions—DAC, biochar, afforesta
 ## Core API Endpoints
 PTC exposes a fully RESTful OpenAPI 3.1-compliant backend with endpoints for managing interventions, satellite data, impact simulations, and optimization. See [API_REFERENCE.md](backend/app/api/api_v1/endpoints/API_REFERENCE.md) for full endpoint docs.
 
-## 🔧 Getting Started
+## Getting Started
 
 ### Prerequisites
 - Node.js 18+
