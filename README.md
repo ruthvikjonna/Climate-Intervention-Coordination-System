@@ -73,7 +73,7 @@ PTC exposes a fully RESTful OpenAPI 3.1-compliant backend with endpoints for man
 
 ### Quickstart
 ```bash
-git clone https://github.com/ruthvik-jonna/planetary-temperature-control.git
+git clone https://github.com/<your-username>/planetary-temperature-control.git
 cd ptc && npm install && pip install -r requirements.txt
 npm run dev
 ```
