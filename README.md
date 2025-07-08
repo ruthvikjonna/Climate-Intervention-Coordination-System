@@ -16,7 +16,7 @@ Built to orchestrate large-scale climate interventions—DAC, biochar, afforesta
 - **Interactive Global Map** - Real-time visualization of climate metrics and intervention impact
 - **Cooling Forecast Simulation** - NVIDIA Earth-2 integration for regional temperature projections
 - **Multi-Operator Coordination** - Schedules interventions across actors to prevent overlap and boost synergy
-- **Satellite Data Ingestion** - NASA, NOAA, Copernicus feeds auto-ingested and geospatially indexed
+- **Satellite Data Ingestion** - NASA feeds auto-ingested and geospatially indexed
 - **Impact Analytics Dashboard** - Deployment ROI, risk, and regulatory overlays
 - **Smart Site Selector** - Predicts top sites based on cost, climate impact, and constraints
 
@@ -34,7 +34,7 @@ Built to orchestrate large-scale climate interventions—DAC, biochar, afforesta
 
 ### Data & Infra
 - **DB**: Supabase PostgreSQL + PostGIS
-- **Satellite APIs**: NASA EarthData, Copernicus C3S, NOAA GFS
+- **Satellite APIs**: NASA OSDR
 - **Time-Series & Spatial Indexing**: Climate grid tables, intervention logs, ROI zones
 - **Security**: Role-based auth, row-level access, encrypted service tokens
 - **CI/CD**: GitHub Actions for test, lint, deploy; Docker/K8s-ready for scale
@@ -46,7 +46,7 @@ Built to orchestrate large-scale climate interventions—DAC, biochar, afforesta
   - Python models simulate outcomes for DAC, biochar, and afforestation
   - Outputs: projected °C cooling, CO₂ ppm reduction, intervention score
 
-- **ML-Augmented Climate Engine** *(In Progress)*:
+- **ML-Augmented Climate Engine**:
   - **Lasso/Ridge Regression**: Predict intervention outcomes (CO₂ ppm, °C change) from historical and satellite features
   - **Random Forest Classifier**: Assess site suitability across High / Medium / Low effectiveness tiers
   - **Boosting Models**: Rank interventions by predicted impact, cost-efficiency, and regional policy alignment
