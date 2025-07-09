@@ -46,19 +46,23 @@ Built to orchestrate large-scale climate interventions—DAC, biochar, afforesta
   - Python models simulate outcomes for DAC, biochar, and afforestation
   - Outputs: projected °C cooling, CO₂ ppm reduction, intervention score
 
-- **ML-Augmented Climate Engine**:
-  - **Lasso/Ridge Regression**: Predict intervention outcomes (CO₂ ppm, °C change) from historical and satellite features
-  - **Random Forest Classifier**: Assess site suitability across High / Medium / Low effectiveness tiers
-  - **Boosting Models**: Rank interventions by predicted impact, cost-efficiency, and regional policy alignment
-  - Enhances Earth2Studio forecasts with empirical performance modeling
+**ML-Augmented Climate Engine**:
+- **Lasso/Ridge Regression**: Predict intervention outcomes (CO₂ ppm, °C change) from historical and satellite features
+- **Random Forest Classifier**: Assess site suitability across High / Medium / Low effectiveness tiers
+- **Boosting Models**: Rank interventions by predicted impact, cost-efficiency, and regional policy alignment
+- Enhances Earth2Studio forecasts with empirical performance modeling
 
-- **Dynamic Site Optimization**:
-  - PostGIS queries match interventions to geography, time, and cost-efficiency
-  - Integrates user-selected constraints: terrain, policy, seasonal viability
+**NVIDIA Earth-2 Integration**:
+- Earth2Studio simulates 6–24 month cooling impact
+- Supports multiple levers (DAC, biochar, afforestation)
+- Advanced simulation mode with physics-based models
+- Regional climate forecasting capabilities
 
-- **NVIDIA Earth-2 Integration**:
-  - Earth2Studio simulates 6–24 month cooling impact
-  - Supports multiple levers (DAC, biochar, afforestation)
+**Dynamic Site Optimization**:
+- PostGIS queries match interventions to geography, time, and cost-efficiency
+- Integrates user-selected constraints: terrain, policy, seasonal viability
+- Spatial indexing for high-performance geospatial queries
+- Multi-objective optimization algorithms
 
 ## Core API Endpoints
 PTC exposes a fully RESTful OpenAPI 3.1-compliant backend with endpoints for managing interventions, satellite data, impact simulations, and optimization. See [API_REFERENCE.md](backend/app/api/api_v1/endpoints/API_REFERENCE.md) for full endpoint docs.
@@ -69,11 +73,12 @@ PTC exposes a fully RESTful OpenAPI 3.1-compliant backend with endpoints for man
 - Node.js 18+
 - Python 3.11+
 - PostgreSQL with PostGIS
+- Redis (for Celery)
 - Mapbox + Earth2Studio API keys
 
 ### Quickstart
 ```bash
-git clone https://github.com/<your-username>/planetary-temperature-control.git
+git clone https://github.com/ruthvikjonna/planetary-temperature-control-platform.git
 cd ptc && npm install && pip install -r requirements.txt
 npm run dev
 ```
