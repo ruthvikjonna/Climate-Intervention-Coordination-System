@@ -1,15 +1,13 @@
 ![Mapbox Globe UI](media/mapbox-globe-ui.png)
-# Planetary Temperature Control Platform MVP
-
-**A Real-Time Climate Intervention Coordination System**
+# Climate Intervention Coordination System MVP
 
 Built to orchestrate large-scale climate interventions—DAC, biochar, afforestation—using satellite data, geospatial optimization, and NVIDIA Earth-2 simulations. Developed across multiple technical iterations with real user input, operator pilots, and production-ready architecture.
 
 ## Project Overview
 
-**PTC** is a full-stack geospatial intelligence platform enabling climate operators to decide _where, when, and how much_ to deploy carbon removal technologies for **maximum cooling effect**.
+**CICS** is a full-stack geospatial intelligence platform enabling climate operators to decide _where, when, and how much_ to deploy carbon removal technologies for **maximum cooling effect**.
 
-**Why It Matters**: Today's interventions operate in silos — wasting millions in misallocated capital. PTC solves this by turning climate deployment decisions into **data-driven, real-time, optimized actions**.
+**Why It Matters**: Today's interventions operate in silos — wasting millions in misallocated capital. CICS solves this by turning climate deployment decisions into **data-driven, real-time, optimized actions**.
 
 ## Product Highlights
 
@@ -65,7 +63,7 @@ Built to orchestrate large-scale climate interventions—DAC, biochar, afforesta
 - Multi-objective optimization algorithms
 
 ## Core API Endpoints
-PTC exposes a fully RESTful OpenAPI 3.1-compliant backend with endpoints for managing interventions, satellite data, impact simulations, and optimization. See [API_REFERENCE.md](backend/app/api/api_v1/endpoints/API_REFERENCE.md) for full endpoint docs.
+CICS exposes a fully RESTful OpenAPI 3.1-compliant backend with endpoints for managing interventions, satellite data, impact simulations, and optimization. See [API_REFERENCE.md](backend/app/api/api_v1/endpoints/API_REFERENCE.md) for full endpoint docs.
 
 ## Getting Started
 
@@ -78,12 +76,12 @@ PTC exposes a fully RESTful OpenAPI 3.1-compliant backend with endpoints for man
 
 ### Quickstart
 ```bash
-git clone https://github.com/ruthvikjonna/planetary-temperature-control-platform.git
-cd ptc && npm install && pip install -r requirements.txt
+git clone https://github.com/ruthvikjonna/climate-intervention-coordination-system.git
+cd cics && npm install && pip install -r requirements.txt
 npm run dev
 ```
 
 ### Final Thoughts
-PTC isn't just another climate SaaS—it's the ops layer for Earth's thermostat. We simulate impact before you act, coordinate cross-actor deployments, and make planetary cooling precise, scalable, and actionable.
+CICS isn't just another climate SaaS—it's the ops layer for Earth's thermostat. We simulate impact before you act, coordinate cross-actor deployments, and make planetary cooling precise, scalable, and actionable.
 
 **"It's SimCity for the atmosphere—but real, and deployable."**
